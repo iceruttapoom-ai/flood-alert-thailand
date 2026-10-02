@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0769d8">
+<title>Flood Alert Pro</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#eaf2f8;font-family:Arial,"Noto Sans Thai",sans-serif;color:#17324d}
+.app{max-width:430px;margin:auto;background:#f7fbff;min-height:100vh}
+header{padding:22px 18px;color:#fff;background:linear-gradient(145deg,#075bc5,#13a9e8);border-radius:0 0 28px 28px}
+.top{display:flex;justify-content:space-between;align-items:center}.logo{font-size:22px;font-weight:800}.iconbtn{border:0;background:#ffffff26;color:white;border-radius:13px;width:42px;height:42px;font-size:20px}
+small,.muted{color:#718399;font-size:12px}.headsub{margin-top:7px;opacity:.9}
+main{padding:15px}.card{background:#fff;border-radius:20px;padding:16px;margin-bottom:13px;box-shadow:0 5px 18px #214d7112}
+.location{display:flex;gap:11px;align-items:center}.pin{font-size:27px}.switch{margin-left:auto;border:0;background:#eaf3ff;color:#0965ca;border-radius:11px;padding:9px 10px;font-weight:700}
+.status{display:flex;align-items:center;gap:12px}.dot{width:14px;height:14px;border-radius:50%;background:#18a957;box-shadow:0 0 0 5px #18a95720}.status h2{margin:0;font-size:20px}.status p{margin:5px 0 0;color:#718399;font-size:12px}
+.level{margin-top:18px}.row{display:flex;justify-content:space-between;font-weight:700;font-size:14px}.bar{height:13px;background:#e6eef5;border-radius:20px;margin-top:8px;overflow:hidden}.fill{height:100%;width:38%;background:linear-gradient(90deg,#16a05a,#f3c83b);border-radius:20px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.metric{background:#f3f7fb;border-radius:15px;padding:13px}.metric span{font-size:12px;color:#718399}.metric b{display:block;font-size:19px;margin-top:4px}
+h3{font-size:16px;margin:0 0 12px}.forecast{display:flex;gap:8px;overflow:auto}.day{min-width:72px;text-align:center;background:#f3f7fb;padding:10px 6px;border-radius:14px}.rain{font-size:22px;margin:6px}.day small{font-size:11px}
+.alert{background:#fff8e5;border-left:5px solid #efb62b}.danger{background:#fff0f0;border-left:5px solid #e04444}.alert strong{color:#986500}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:9px}.actions button{border:0;border-radius:13px;padding:12px;font-weight:700}.primary{background:#0867d4;color:#fff}.secondary{background:#e9f3ff;color:#0965ca}
+.map{height:155px;border-radius:17px;background:linear-gradient(135deg,#dff2ff,#c9e8d1);position:relative;overflow:hidden}.river{position:absolute;width:130%;height:60px;background:#74c9ee;transform:rotate(-12deg);top:48px;left:-25px;border-radius:50%}.marker{position:absolute;top:58px;left:48%;font-size:28px;z-index:2}.maplabel{position:absolute;bottom:10px;left:10px;background:#fffdd;padding:7px 10px;border-radius:10px;font-size:11px;z-index:3}
+footer{text-align:center;padding:6px 18px 25px;color:#8a98a9;font-size:10px}.toast{position:fixed;bottom:22px;left:50%;transform:translate(-50%,120px);background:#18334f;color:#fff;padding:12px 17px;border-radius:13px;transition:.25s;z-index:5}.toast.show{transform:translate(-50%,0)}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+<div class="top"><div class="logo">🌊 Flood Alert Pro</div><button class="iconbtn" onclick="alertOn()">🔔</button></div>
+<div class="headsub">ระบบเฝ้าระวังและแจ้งเตือนน้ำท่วม</div>
+</header>
+<main>
+<section class="card">
+<div class="location"><div class="pin">📍</div><div><b>พื้นที่ของฉัน</b><div class="muted">บางขันหมาก • เมืองลพบุรี • ลพบุรี</div></div><button class="switch" onclick="changeArea()">เปลี่ยน</button></div>
+</section>
+
+<section class="card">
+<div class="status"><div class="dot"></div><div><h2 id="status">สถานการณ์ปกติ</h2><p id="statusText">ระบบตรวจพบความเสี่ยงในระดับต่ำ</p></div></div>
+<div class="level"><div class="row"><span>ระดับน้ำ</span><span id="water">1.14 ม.</span></div><div class="bar"><div class="fill" id="fill"></div></div><small>ระดับเฝ้าระวัง 2.00 ม. • ระดับวิกฤต 2.50 ม.</small></div>
+</section>
+
+<section class="card">
+<div class="grid">
+<div class="metric"><span>🌧️ ฝนสะสม 24 ชม.</span><b>42 มม.</b></div>
+<div class="metric"><span>💧 ความชื้น</span><b>78%</b></div>
+<div class="metric"><span>🌡️ อุณหภูมิ</span><b>29°C</b></div>
+<div class="metric"><span>🕐 อัปเดตล่าสุด</span><b id="time">10:50</b></div>
+</div>
+</section>
+
+<section class="card">
+<h3>🗺️ แผนที่พื้นที่เฝ้าระวัง</h3>
+<div class="map"><div class="river"></div><div class="marker">📍</div><div class="maplabel">จุดตรวจวัดระดับน้ำ</div></div>
+</section>
+
+<section class="card">
+<h3>🌦️ พยากรณ์ฝน</h3>
+<div class="forecast">
+<div class="day"><b>วันนี้</b><div class="rain">🌦️</div><small>40%</small></div>
+<div class="day"><b>พรุ่งนี้</b><div class="rain">🌧️</div><small>70%</small></div>
+<div class="day"><b>4 ต.ค.</b><div class="rain">🌧️</div><small>65%</small></div>
+<div class="day"><b>5 ต.ค.</b><div class="rain">⛅</div><small>35%</small></div>
+<div class="day"><b>6 ต.ค.</b><div class="rain">☀️</div><small>20%</small></div>
+</div>
+</section>
+
+<section class="card alert" id="advice">
+<strong>⚠️ คำแนะนำ</strong>
+<p style="font-size:13px;line-height:1.5;margin:7px 0">ติดตามระดับน้ำอย่างต่อเนื่อง เตรียมเอกสาร ยา ของจำเป็น และย้ายสิ่งของขึ้นที่สูงหากระดับน้ำเพิ่มเร็ว</p>
+</section>
+
+<section class="card">
+<h3>🔔 การแจ้งเตือน</h3>
+<div class="actions"><button class="primary" onclick="alertOn()">เปิดแจ้งเตือน</button><button class="secondary" onclick="testAlert()">ทดสอบแจ้งเตือน</button></div>
+</section>
+</main>
+<footer>Flood Alert Pro Prototype • ข้อมูลตัวอย่างสำหรับการสาธิต ไม่ใช่ข้อมูลเตือนภัยทางการ</footer>
+</div>
+<div id="toast" class="toast"></div>
+<script>
+function toast(t){let x=document.getElementById('toast');x.textContent=t;x.classList.add('show');setTimeout(()=>x.classList.remove('show'),2500)}
+function alertOn(){toast('เปิดการแจ้งเตือนแล้ว 🔔')}
+function testAlert(){toast('🔔 ทดสอบ: หากน้ำถึงระดับเฝ้าระวัง ระบบจะแจ้งเตือน')}
+function changeArea(){toast('ระบบเลือกพื้นที่พร้อมเชื่อม GPS/API ได้')}
+function updateTime(){document.getElementById('time').textContent=new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})}
+updateTime()
+</script>
+</body>
+</html>
